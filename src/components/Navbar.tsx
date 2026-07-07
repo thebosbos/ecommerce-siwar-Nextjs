@@ -32,7 +32,7 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           <SidebarTrigger className="hover:bg-muted/50 transition-colors duration-200" />
           <Link href="/" className="flex cursor-pointer items-center">
-            <h1 className="text-2xl font-bold">ShopClone</h1>
+            <h1 className="text-2xl font-bold">Glow&Home</h1>
           </Link>
         </div>
 
