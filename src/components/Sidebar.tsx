@@ -140,10 +140,7 @@ export default function Sidebar() {
                 className="flex flex-col"
               >
                 <span className="text-foreground text-base font-semibold">
-                  E-Store
-                </span>
-                <span className="text-muted-foreground text-xs">
-                  Premium Shop
+                  Glow&Home
                 </span>
               </Motion>
             )}
