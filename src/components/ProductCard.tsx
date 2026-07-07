@@ -6,8 +6,20 @@ import { ProductType } from "@/types";
 import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
 import { Star, Heart, ShoppingCart, Eye, Badge, Zap } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
+
+// Deterministic pseudo-random number in [0, 1) seeded from a string, so the
+// same product always renders the same rating/sale status instead of
+// re-rolling (and visibly flickering) on every re-render.
+function seededRandom(seed: string): number {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i);
+    hash |= 0;
+  }
+  return (hash >>> 0) / 4294967296;
+}
 
 interface ProductCardProps {
   product: ProductType;
@@ -38,11 +50,20 @@ export function ProductCard({ product }: ProductCardProps) {
     router.push(`/products/${product.product_id}`);
   };
 
-  // Generate mock rating and reviews for demonstration
-  const rating = 4.2 + Math.random() * 0.8;
-  const reviewCount = Math.floor(Math.random() * 200) + 50;
-  const isOnSale = Math.random() > 0.7;
-  const originalPrice = isOnSale ? product.price * 1.3 : null;
+  // Mock rating and reviews for demonstration, seeded from the product id so
+  // they stay stable across re-renders instead of changing on every hover.
+  const { rating, reviewCount, isOnSale, originalPrice } = useMemo(() => {
+    const r1 = seededRandom(`${product.product_id}-rating`);
+    const r2 = seededRandom(`${product.product_id}-reviews`);
+    const r3 = seededRandom(`${product.product_id}-sale`);
+
+    const rating = 4.2 + r1 * 0.8;
+    const reviewCount = Math.floor(r2 * 200) + 50;
+    const isOnSale = r3 > 0.7;
+    const originalPrice = isOnSale ? product.price * 1.3 : null;
+
+    return { rating, reviewCount, isOnSale, originalPrice };
+  }, [product.product_id, product.price]);
 
   const renderStars = () => {
     return Array.from({ length: 5 }, (_, index) => {
@@ -147,12 +168,20 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Stock Indicator */}
-        {product.stock <= 5 && product.stock > 0 && (
+        {product.stock === 0 ? (
           <div className="absolute bottom-2 left-2">
-            <div className="bg-accent text-accent-foreground rounded-md px-2 py-1 text-xs font-medium">
-              {product.stock} left
+            <div className="bg-destructive text-destructive-foreground rounded-md px-2 py-1 text-xs font-medium">
+              Out of Stock
             </div>
           </div>
+        ) : (
+          product.stock <= 5 && (
+            <div className="absolute bottom-2 left-2">
+              <div className="bg-accent text-accent-foreground rounded-md px-2 py-1 text-xs font-medium">
+                {product.stock} left
+              </div>
+            </div>
+          )
         )}
       </div>
 
@@ -167,8 +196,18 @@ export function ProductCard({ product }: ProductCardProps) {
             </span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="bg-primary h-1 w-1 rounded-full"></div>
-            <span className="text-primary text-xs font-medium">In Stock</span>
+            <div
+              className={`h-1 w-1 rounded-full ${
+                product.stock > 0 ? "bg-primary" : "bg-destructive"
+              }`}
+            ></div>
+            <span
+              className={`text-xs font-medium ${
+                product.stock > 0 ? "text-primary" : "text-destructive"
+              }`}
+            >
+              {product.stock > 0 ? "In Stock" : "Out of Stock"}
+            </span>
           </div>
         </div>
 

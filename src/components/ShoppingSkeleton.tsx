@@ -14,7 +14,7 @@ export default function ShoppingSkeleton() {
   return (
     <div className="container mx-auto p-4">
       <div className="mb-6 flex items-center">
-        <Link href="/" className="text-primary flex items-center">
+        <Link href="/shop" className="text-primary flex items-center">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Shopping
         </Link>

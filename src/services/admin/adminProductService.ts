@@ -15,7 +15,7 @@ export interface UpdateProductData extends Partial<CreateProductData> {
   updated_at?: string;
 }
 
-export interface ProductWithDetails extends ProductType {
+export interface ProductWithDetails extends Omit<ProductType, "category"> {
   category?: {
     id: number;
     name: string;

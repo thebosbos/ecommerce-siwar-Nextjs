@@ -13,6 +13,7 @@ import {
 
 import { format } from "date-fns";
 import { AdminUsersClient } from "./AdminUsersClient";
+import { AdminUserActions } from "./AdminUserActions";
 import { getCurrentUser } from "@/services/auth/authServerService";
 import {
   adminUserServerService,
@@ -150,6 +151,12 @@ export default async function AdminUsersPage({
                         </Badge>
                       )}
                     </div>
+                    <AdminUserActions
+                      userId={user.profile_id}
+                      username={user.username}
+                      role={user.role as "admin" | "user"}
+                      isCurrentUser={user.profile_id === currentUser.profile_id}
+                    />
                   </div>
                 </div>
               </CardContent>

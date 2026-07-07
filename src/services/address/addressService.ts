@@ -3,7 +3,7 @@ import { AddressType } from '@/types';
 import { toast } from 'sonner';
 
 interface SaveAddressParams {
-  address: AddressType;
+  address: Omit<AddressType, 'id' | 'user_id'>;
   userId: string;
 }
 
@@ -19,6 +19,7 @@ export const addressService = {
           state: address.state || '',
           zip_code: address.zip_code,
           country: address.country,
+          phone: address.phone || '',
           is_default: address.is_default || false,
         },
       ])
@@ -55,6 +56,7 @@ export const addressService = {
         state: address.state || '',
         zip_code: address.zip_code,
         country: address.country,
+        phone: address.phone || '',
         is_default: address.is_default || false,
       })
       .eq('id', addressId)

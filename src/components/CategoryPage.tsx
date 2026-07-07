@@ -5,31 +5,36 @@ import { motion, AnimatePresence } from 'motion/react'
 import { Input } from '@/components/ui/input'
 import { ProductCard } from '@/components/ProductCard'
 import { useAuth } from '@/context/AuthContext'
-import { useProductsByCategory } from '@/hooks/queries'
+import { useCategories, useProductsByCategory } from '@/hooks/queries'
 import { useRouter } from 'next/navigation'
 import { ErrorState } from '@/components/ErrorState'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 interface CategoryPageProps {
 	categoryName: string
-	categoryId: number
 }
 
-export default function CategoryPage({
-	categoryName,
-	categoryId,
-}: CategoryPageProps) {
+export default function CategoryPage({ categoryName }: CategoryPageProps) {
 	const { user } = useAuth()
 	const router = useRouter()
 	const [searchTerm, setSearchTerm] = useState('')
 
+	// Resolve the category id dynamically from its name instead of hardcoding it,
+	// since category ids depend on what's actually seeded in the database.
+	const { data: categories, isLoading: categoriesLoading } = useCategories()
+	const category = categories?.find(
+		(c) => c.name.toLowerCase() === categoryName.toLowerCase()
+	)
+
 	// Use TanStack Query hook instead of manual state management
 	const {
 		data: products,
-		isLoading: loading,
+		isLoading: productsLoading,
 		error,
 		refetch: fetchProducts,
-	} = useProductsByCategory(categoryId)
+	} = useProductsByCategory(category?.id ?? 0)
+
+	const loading = categoriesLoading || (!!category && productsLoading)
 
 	// Filter products based on search term using useMemo
 	const filteredProducts = useMemo(() => {

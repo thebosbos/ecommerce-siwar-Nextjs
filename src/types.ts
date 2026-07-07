@@ -7,6 +7,7 @@ export interface ProductType {
   stock: number;
   sku?: string;
   category_id?: number;
+  category?: CategoryType;
   created_at?: string;
   updated_at?: string;
 }
@@ -76,6 +77,7 @@ export interface AddressType {
   state?: string;
   zip_code: string;
   country: string;
+  phone?: string;
   is_default: boolean;
 }
 

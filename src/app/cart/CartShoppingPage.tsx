@@ -30,7 +30,7 @@ export default function CartShoppingPage() {
     return (
       <div className="container mx-auto p-4">
         <div className="mb-6 flex items-center">
-          <Link href="/" className="text-primary flex items-center">
+          <Link href="/shop" className="text-primary flex items-center">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Shopping
           </Link>
@@ -62,7 +62,7 @@ export default function CartShoppingPage() {
   return (
     <div className="container mx-auto p-4">
       <div className="mb-6 flex items-center">
-        <Link href="/" className="text-primary flex items-center">
+        <Link href="/shop" className="text-primary flex items-center">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Shopping
         </Link>
@@ -72,7 +72,7 @@ export default function CartShoppingPage() {
       {cartItems.length === 0 ? (
         <div className="p-8 text-center">
           <h2 className="mb-4 text-xl">Your cart is empty</h2>
-          <Link href="/">
+          <Link href="/shop">
             <Button className="cursor-pointer">Continue Shopping</Button>
           </Link>
         </div>

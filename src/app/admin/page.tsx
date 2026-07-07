@@ -17,11 +17,13 @@ import {
   DollarSign,
   Activity,
   Settings,
+  FolderTree,
 } from "lucide-react";
 import { adminProductService } from "@/services/admin/adminProductService";
 import { adminOrderService } from "@/services/admin/adminOrderService";
 import { adminUserService } from "@/services/admin/adminUserService";
 import { formatCurrency } from "@/utils/formatCurrency";
+import { ProductType } from "@/types";
 import Link from "next/link";
 
 interface DashboardStats {
@@ -50,6 +52,7 @@ export default function AdminDashboard() {
   const router = useRouter();
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [lowStockProducts, setLowStockProducts] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -68,12 +71,15 @@ export default function AdminDashboard() {
       setLoading(true);
 
       // Fetch all analytics data in parallel
-      const [productAnalytics, orderAnalytics, userAnalytics] =
+      const [productAnalytics, orderAnalytics, userAnalytics, lowStock] =
         await Promise.all([
           adminProductService.getProductAnalytics(),
           adminOrderService.getOrderAnalytics(),
           adminUserService.getUserAnalytics(),
+          adminProductService.getLowStockProducts(),
         ]);
+
+      setLowStockProducts(lowStock);
 
       setStats({
         products: {
@@ -221,11 +227,17 @@ export default function AdminDashboard() {
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
             <Link href="/admin/products">
               <Button className="w-full cursor-pointer" variant="outline">
                 <Package className="mr-2 h-4 w-4" />
                 Manage Products
+              </Button>
+            </Link>
+            <Link href="/admin/categories">
+              <Button className="w-full cursor-pointer" variant="outline">
+                <FolderTree className="mr-2 h-4 w-4" />
+                Manage Categories
               </Button>
             </Link>
             <Link href="/admin/orders">
@@ -292,15 +304,32 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent className="space-y-3">
             {stats.products.lowStock > 0 && (
-              <div className="flex items-center rounded-lg border border-yellow-200 bg-yellow-50 p-3">
-                <AlertTriangle className="mr-2 h-4 w-4 text-yellow-600" />
-                <div>
+              <div className="flex items-start rounded-lg border border-yellow-200 bg-yellow-50 p-3">
+                <AlertTriangle className="mt-0.5 mr-2 h-4 w-4 shrink-0 text-yellow-600" />
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-yellow-800">
                     Low Stock Alert
                   </p>
                   <p className="text-xs text-yellow-600">
-                    {stats.products.lowStock} products are running low on stock
+                    {stats.products.lowStock} product
+                    {stats.products.lowStock !== 1 ? "s" : ""} running low on
+                    stock
                   </p>
+                  {lowStockProducts.length > 0 && (
+                    <ul className="mt-1.5 space-y-0.5">
+                      {lowStockProducts.map((product) => (
+                        <li
+                          key={product.product_id}
+                          className="truncate text-xs text-yellow-700"
+                        >
+                          {product.title} &mdash;{" "}
+                          {product.stock === 0
+                            ? "out of stock"
+                            : `${product.stock} left`}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
             )}

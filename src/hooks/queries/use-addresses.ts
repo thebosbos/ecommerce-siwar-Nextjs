@@ -50,7 +50,7 @@ export function useCreateAddress() {
 			address,
 			userId,
 		}: {
-			address: AddressType
+			address: Omit<AddressType, 'id' | 'user_id'>
 			userId: string
 		}) => {
 			return addressService.saveAddress({ address, userId })

@@ -10,16 +10,6 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ProductFilter } from "@/components/ProductFilter";
 import { useState, useMemo } from "react";
 
-// Helper functions (moved from hook to component for simplicity)
-const getCategoryId = (categoryName: string): number | null => {
-  const categoryMap: { [key: string]: number } = {
-    electronics: 3,
-    clothing: 1,
-    accessories: 2,
-  };
-  return categoryMap[categoryName] || null;
-};
-
 // Sort products based on the selected option
 const sortProducts = (
   products: ProductType[],
@@ -54,12 +44,10 @@ const filterProducts = (products: ProductType[], filters: FilterOptions) => {
 
   // Filter by category (only if not 'all')
   if (filters.categoryFilter !== "all") {
-    const categoryId = getCategoryId(filters.categoryFilter);
-    if (categoryId !== null) {
-      filtered = filtered.filter(
-        (product) => product.category_id === categoryId,
-      );
-    }
+    filtered = filtered.filter(
+      (product) =>
+        product.category?.name.toLowerCase() === filters.categoryFilter,
+    );
   }
   // When categoryFilter is 'all', show all categories
 

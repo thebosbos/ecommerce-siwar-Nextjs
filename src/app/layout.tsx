@@ -3,12 +3,9 @@ import { CartProvider } from "@/context/CartContext";
 import { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Navbar } from "@/components/Navbar";
-import Sidebar  from "@/components/Sidebar";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { AppShell } from "@/components/AppShell";
 import { TanStackQueryProvider } from "@/lib/providers/query-provider";
 import { Toaster } from "sonner";
-import { MainLayout } from "@/components/MainLayout";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 //import { DemoBanner } from "@/components/DemoBanner";
 import { Geist } from "next/font/google";
@@ -44,14 +41,7 @@ export default function RootLayout({
                   enableSystem
                   disableTransitionOnChange
                 >
-                  <SidebarProvider>
-                    <Sidebar />
-                    <SidebarInset>
-                      
-                      <Navbar />
-                      <MainLayout>{children}</MainLayout>
-                    </SidebarInset>
-                  </SidebarProvider>
+                  <AppShell>{children}</AppShell>
                 </ThemeProvider>
               </CartProvider>
             </AuthProvider>

@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FilterOptions } from "@/hooks/queries";
+import { FilterOptions, useCategories } from "@/hooks/queries";
 
 interface ProductFilterProps {
   filters: FilterOptions;
@@ -30,14 +30,17 @@ const stockOptions = [
   { value: "out-of-stock", label: "Out of Stock" },
 ];
 
-const categoryOptions = [
-  { value: "all", label: "All Categories" },
-  { value: "electronics", label: "Electronics" },
-  { value: "clothing", label: "Clothing" },
-  { value: "accessories", label: "Accessories" },
-];
-
 export function ProductFilter({ filters, onFilterChange }: ProductFilterProps) {
+  const { data: categories } = useCategories();
+
+  const categoryOptions = [
+    { value: "all", label: "All Categories" },
+    ...(categories || []).map((category) => ({
+      value: category.name.toLowerCase(),
+      label: category.name,
+    })),
+  ];
+
   const handleSortChange = (value: string | null) => {
     if (value == null) return;
     onFilterChange({

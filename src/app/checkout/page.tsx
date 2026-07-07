@@ -1,6 +1,6 @@
 import { getAuthenticatedUser } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import CheckoutRedirect from "@/app/checkout/CheckoutRedirect";
+import CheckoutForm from "@/app/checkout/CheckoutForm";
 
 // This is a Server Component by default, no need for 'use client'
 export default async function CheckoutPage() {
@@ -12,5 +12,5 @@ export default async function CheckoutPage() {
 		redirect("/signin");
 	}
 
-	return <CheckoutRedirect />;
+	return <CheckoutForm />;
 }

@@ -171,7 +171,7 @@ export default function DashboardPage() {
                   <p className="text-muted-foreground mb-6">
                     You haven&apos;t placed any orders yet.
                   </p>
-                  <Link href="/">
+                  <Link href="/shop">
                     <Button>Browse Products</Button>
                   </Link>
                 </div>

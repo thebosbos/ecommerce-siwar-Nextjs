@@ -1,10 +1,13 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { ProfileCard } from "@/components/ProfileCard";
 import { OrderCard } from "@/components/OrderCard";
 import { EmptyOrdersState } from "@/components/EmptyOrdersState";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Package, DollarSign, Clock, ShoppingBag } from "lucide-react";
+import { formatCurrency } from "@/utils/formatCurrency";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
@@ -164,8 +167,20 @@ export default function ProfileClientPage({
     };
   }, [user.id]);
 
+  const stats = useMemo(() => {
+    const totalOrders = orders.length;
+    const totalSpent = orders
+      .filter((o) => o.status !== "cancelled")
+      .reduce((sum, o) => sum + o.total, 0);
+    const pendingOrders = orders.filter((o) =>
+      ["pending", "processing"].includes(o.status),
+    ).length;
+
+    return { totalOrders, totalSpent, pendingOrders };
+  }, [orders]);
+
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto space-y-6 px-4 py-6">
       <ProfileCard
         user={user}
         username={username}
@@ -181,21 +196,65 @@ export default function ProfileClientPage({
         onUpdateEmail={handleUpdateEmail}
       />
 
-      <h2 className="mb-4 text-2xl font-bold">My Orders</h2>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Orders
+            </CardTitle>
+            <Package className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalOrders}</div>
+          </CardContent>
+        </Card>
 
-      {orders.length === 0 ? (
-        <EmptyOrdersState onBrowseProducts={() => router.push("/")} />
-      ) : (
-        <div className="space-y-4">
-          {orders.map((order) => (
-            <OrderCard
-              key={order.id}
-              order={order}
-              onDelete={handleOrderDeleted}
-            />
-          ))}
-        </div>
-      )}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Spent</CardTitle>
+            <DollarSign className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formatCurrency(stats.totalSpent)}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+            <Clock className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.pendingOrders}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ShoppingBag className="h-5 w-5" />
+            My Orders
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {orders.length === 0 ? (
+            <EmptyOrdersState onBrowseProducts={() => router.push("/shop")} />
+          ) : (
+            <div className="space-y-4">
+              {orders.map((order) => (
+                <OrderCard
+                  key={order.id}
+                  order={order}
+                  onDelete={handleOrderDeleted}
+                />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

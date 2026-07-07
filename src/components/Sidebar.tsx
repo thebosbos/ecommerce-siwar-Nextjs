@@ -17,6 +17,7 @@ import {
   ChevronRight,
   User,
   RefreshCw,
+  FolderTree,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -54,7 +55,6 @@ import {
   staggerVariants,
   itemVariants,
   searchVariants,
-  indicatorVariants,
 } from "@/components/motion/animation-variants";
 
 // Default icons for each category
@@ -93,7 +93,7 @@ export default function Sidebar() {
 
   // Mapping of categories from DB to display with icons and hrefs
   const categoryItems = [
-    { name: "All", icon: Home, href: "/" },
+    { name: "All", icon: Home, href: "/shop" },
     ...(categories || []).map((category) => ({
       name: category.name,
       icon: categoryIcons[category.name] || Smartphone,
@@ -112,6 +112,7 @@ export default function Sidebar() {
   const adminNavItems = [
     { name: "Admin Dashboard", icon: Settings, href: "/admin" },
     { name: "Products", icon: Package, href: "/admin/products" },
+    { name: "Categories", icon: FolderTree, href: "/admin/categories" },
     { name: "Orders", icon: ShoppingCart, href: "/admin/orders" },
     { name: "Users", icon: Users, href: "/admin/users" },
   ];
@@ -233,20 +234,6 @@ export default function Sidebar() {
                                   {item.name}
                                 </span>
                               )}
-                              {/* Active indicator */}
-                              {isActive && (
-                                <Motion
-                                  variants={indicatorVariants}
-                                  initial="closed"
-                                  animate="open"
-                                  transition={{
-                                    type: "spring",
-                                    stiffness: 500,
-                                    damping: 30,
-                                  }}
-                                  className="bg-primary absolute right-2 h-2 w-2 rounded-full"
-                                />
-                              )}
                             </SidebarMenuButton>
                           </SidebarMenuItem>
                         </Motion>
@@ -345,20 +332,6 @@ export default function Sidebar() {
                                   {category.name}
                                 </span>
                               )}
-                              {/* Active indicator */}
-                              {isActive && (
-                                <Motion
-                                  variants={indicatorVariants}
-                                  initial="closed"
-                                  animate="open"
-                                  transition={{
-                                    type: "spring",
-                                    stiffness: 500,
-                                    damping: 30,
-                                  }}
-                                  className="bg-primary absolute right-2 h-2 w-2 rounded-full"
-                                />
-                              )}
                             </SidebarMenuButton>
                           </SidebarMenuItem>
                         </Motion>
@@ -377,6 +350,7 @@ export default function Sidebar() {
         <SidebarFooter>
           <DropdownMenu>
             <DropdownMenuTrigger
+              nativeButton={isCollapsed}
               render={
                 !isCollapsed ? (
                   <Motion

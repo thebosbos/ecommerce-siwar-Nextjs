@@ -1,14 +1,17 @@
 "use client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { useState, useEffect, ChangeEvent, useRef } from "react";
 import { User } from "@supabase/supabase-js";
 import { EmailChangeModal } from "@/components/EmailChangeModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { profileService } from "@/services/profile/profileService";
+import { Calendar, LogOut, Mail, UserRound, Camera } from "lucide-react";
+import { format } from "date-fns";
 
 interface ProfileCardProps {
   user: User;
@@ -170,24 +173,34 @@ export function ProfileCard({
   const displayImageUrl = previewUrl || avatarUrlInput || undefined;
 
   return (
-    <Card className="mb-6">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-center gap-2 text-2xl">
+    <Card className="mb-6 overflow-hidden">
+      {/* Hero banner */}
+      <div className="from-primary/15 via-primary/5 relative bg-gradient-to-r to-transparent px-6 py-8">
+        <Button
+          onClick={onSignOut}
+          variant="outline"
+          size="sm"
+          className="bg-background/80 absolute top-4 right-4 cursor-pointer backdrop-blur-sm"
+        >
+          <LogOut className="mr-2 h-3.5 w-3.5" />
+          Sign Out
+        </Button>
+
+        <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
           <div
             className="group relative cursor-pointer"
             onClick={handleAvatarClick}
           >
-            <Avatar className="h-24 w-24">
+            <Avatar className="ring-primary/20 h-24 w-24 ring-4">
               <AvatarImage
                 src={displayImageUrl}
                 className="h-24 w-24 rounded-full object-cover"
               />
-              <AvatarFallback className="h-24 w-24 text-xl">
+              <AvatarFallback className="from-primary to-primary/80 text-primary-foreground h-24 w-24 bg-gradient-to-br text-xl font-semibold">
                 {getInitials()}
               </AvatarFallback>
             </Avatar>
 
-            {/* Hidden file input */}
             <input
               ref={fileInputRef}
               type="file"
@@ -197,106 +210,82 @@ export function ProfileCard({
               className="hidden"
             />
 
-            {/* Overlay with upload icon/text */}
             <div className="bg-opacity-50 absolute inset-0 flex items-center justify-center rounded-full bg-black opacity-0 transition-opacity group-hover:opacity-100">
-              <span className="text-xs text-white">
-                {uploading ? "Uploading..." : "Change Photo"}
-              </span>
-            </div>
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-6">
-          <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <h3 className="mb-4 text-lg font-medium">Account Information</h3>
-              <p className="text-muted-foreground mb-4">{email}</p>
-            </div>
-            <div>
-              <p className="mb-4 text-lg font-medium">
-                {username
-                  ? "Your profile information"
-                  : "Please add your username"}
-              </p>
-              <p className="text-muted-foreground mb-4">
-                {username || "Please add your username"}
-              </p>
+              <Camera className="h-5 w-5 text-white" />
             </div>
           </div>
 
-          <div className="mb-4 grid grid-cols-1 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                value={usernameInput}
-                onChange={(e) => setUsernameInput(e.target.value)}
-                placeholder="Username"
-              />
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl font-bold">
+              {username || "Add a username"}
+            </h1>
+            <p className="text-muted-foreground flex items-center justify-center gap-1.5 text-sm sm:justify-start">
+              <Mail className="h-3.5 w-3.5" />
+              {email}
+            </p>
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+              {createdAt && (
+                <Badge variant="secondary" className="gap-1">
+                  <Calendar className="h-3 w-3" />
+                  Member since{" "}
+                  {format(new Date(createdAt), "MMM yyyy")}
+                </Badge>
+              )}
+              <Badge variant="outline" className="gap-1 font-mono text-xs">
+                <UserRound className="h-3 w-3" />
+                {user.id.slice(0, 8)}
+              </Badge>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="email"
-                  value={email}
-                  disabled
-                  className="bg-muted flex-1"
-                />
-                <Button
-                  type="button"
-                  onClick={() => setIsEmailModalOpen(true)}
-                  variant="outline"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
-                >
-                  Change Email
-                </Button>
-              </div>
-              <p className="text-muted-foreground text-xs">
-                Email changes require verification
-              </p>
-            </div>
-
-            {/* <div className="space-y-2">
-              <Label htmlFor="avatarUrl">Avatar URL</Label>
-              <Input
-                id="avatarUrl"
-                value={avatarUrlInput}
-                onChange={(e) => setAvatarUrlInput(e.target.value)}
-                placeholder="https://example.com/your-avatar.jpg"
-              />
-            </div> */}
-          </div>
-
-          <Button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 mb-4 cursor-pointer"
-          >
-            {isSaving ? "Saving..." : "Save Changes"}
-          </Button>
-
-          <div className="text-muted-foreground space-y-1 text-sm">
-            {createdAt && (
-              <span className="block">
-                Account created:{" "}
-                {new Date(createdAt).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                })}
-              </span>
-            )}
-            <span className="block">Profile ID: {user?.id}</span>
           </div>
         </div>
+      </div>
+
+      {/* Account settings */}
+      <CardContent className="space-y-4 pt-6">
+        <h3 className="text-sm font-semibold tracking-tight">
+          Account Settings
+        </h3>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="username">Username</Label>
+            <Input
+              id="username"
+              value={usernameInput}
+              onChange={(e) => setUsernameInput(e.target.value)}
+              placeholder="Username"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <div className="flex gap-2">
+              <Input
+                id="email"
+                value={email}
+                disabled
+                className="bg-muted flex-1"
+              />
+              <Button
+                type="button"
+                onClick={() => setIsEmailModalOpen(true)}
+                variant="outline"
+                className="cursor-pointer"
+              >
+                Change
+              </Button>
+            </div>
+            <p className="text-muted-foreground text-xs">
+              Email changes require verification
+            </p>
+          </div>
+        </div>
+
         <Button
-          onClick={onSignOut}
-          className="hover:bg-accent hover:text-accent-foreground bg-primary text-primary-foreground cursor-pointer"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="cursor-pointer"
         >
-          Sign Out
+          {isSaving ? "Saving..." : "Save Changes"}
         </Button>
       </CardContent>
 
@@ -305,7 +294,6 @@ export function ProfileCard({
           user={user}
           isOpen={isEmailModalOpen}
           onClose={() => setIsEmailModalOpen(false)}
-          // onUpdateEmail={onUpdateEmail}
           setEmail={setEmail}
         />
       )}

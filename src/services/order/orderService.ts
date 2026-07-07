@@ -32,6 +32,7 @@ interface CreateOrderParams {
   shippingAddress: AddressType;
   totalAmount: number;
   paymentIntentId?: string;
+  paymentMethod?: string;
 }
 
 export const orderService = {
@@ -41,6 +42,7 @@ export const orderService = {
     shippingAddress,
     totalAmount,
     paymentIntentId,
+    paymentMethod,
   }: CreateOrderParams) {
     try {
       // Validate input parameters
@@ -98,6 +100,7 @@ export const orderService = {
             total: totalAmount,
             status: "pending",
             payment_id: paymentIntentId,
+            payment_method: paymentMethod,
             shipping_address_id: shippingAddress.id,
           },
         ])
