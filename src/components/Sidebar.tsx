@@ -129,7 +129,7 @@ export default function Sidebar() {
           >
             <div className="from-primary to-primary/80 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg">
               <span className="text-primary-foreground text-base font-bold">
-                E
+                Glow&Home
               </span>
             </div>
             {!isCollapsed && (
