@@ -127,11 +127,7 @@ export default function Sidebar() {
             animate={isCollapsed ? "closed" : "open"}
             className="flex items-center space-x-2.5"
           >
-            <div className="from-primary to-primary/80 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg">
-              <span className="text-primary-foreground text-base font-bold">
-                Glow&Home
-              </span>
-            </div>
+            
             {!isCollapsed && (
               <Motion
                 variants={itemVariants}
