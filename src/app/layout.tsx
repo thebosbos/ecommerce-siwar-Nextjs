@@ -10,7 +10,7 @@ import { TanStackQueryProvider } from "@/lib/providers/query-provider";
 import { Toaster } from "sonner";
 import { MainLayout } from "@/components/MainLayout";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { DemoBanner } from "@/components/DemoBanner";
+//import { DemoBanner } from "@/components/DemoBanner";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 
@@ -47,7 +47,7 @@ export default function RootLayout({
                   <SidebarProvider>
                     <Sidebar />
                     <SidebarInset>
-                      <DemoBanner />
+                      
                       <Navbar />
                       <MainLayout>{children}</MainLayout>
                     </SidebarInset>
