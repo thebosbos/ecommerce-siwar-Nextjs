@@ -80,6 +80,24 @@ export default function ProfileClientPage({
     }
   };
 
+  // Persist the avatar immediately after a successful upload, independent of
+  // the username/email "Save Changes" flow.
+  const handleAvatarUploaded = async (newAvatarUrl: string) => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: newAvatarUrl })
+        .eq("profile_id", user.id);
+
+      if (error) throw error;
+
+      setAvatarUrl(newAvatarUrl);
+    } catch (error) {
+      console.error("Error saving avatar:", error);
+      toast.error("Failed to save avatar");
+    }
+  };
+
   // Add a handler for auth email updates
   const handleUpdateEmail = async (newEmail: string) => {
     try {
@@ -192,6 +210,7 @@ export default function ProfileClientPage({
         createdAt={initialProfile?.created_at || null}
         isSaving={isSaving}
         onSaveProfile={handleSaveProfile}
+        onAvatarUploaded={handleAvatarUploaded}
         onSignOut={handleSignOut}
         onUpdateEmail={handleUpdateEmail}
       />

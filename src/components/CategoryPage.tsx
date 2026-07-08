@@ -1,12 +1,10 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Input } from '@/components/ui/input'
 import { ProductCard } from '@/components/ProductCard'
-import { useAuth } from '@/context/AuthContext'
 import { useCategories, useProductsByCategory } from '@/hooks/queries'
-import { useRouter } from 'next/navigation'
 import { ErrorState } from '@/components/ErrorState'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 
@@ -15,8 +13,6 @@ interface CategoryPageProps {
 }
 
 export default function CategoryPage({ categoryName }: CategoryPageProps) {
-	const { user } = useAuth()
-	const router = useRouter()
 	const [searchTerm, setSearchTerm] = useState('')
 
 	// Resolve the category id dynamically from its name instead of hardcoding it,
@@ -53,24 +49,6 @@ export default function CategoryPage({ categoryName }: CategoryPageProps) {
 		)
 	}, [searchTerm, products])
 
-	// Client-side authentication check (backup)
-	useEffect(() => {
-		// If not logged in and trying to access restricted categories (Clothing or Accessories)
-		if (
-			!user &&
-			(categoryName === 'Clothing' || categoryName === 'Accessories')
-		) {
-			router.push('/signin')
-		}
-	}, [user, categoryName, router])
-
-	// If not authenticated and trying to access a restricted category, don't render the content
-	if (
-		!user &&
-		(categoryName === 'Clothing' || categoryName === 'Accessories')
-	) {
-		return null
-	}
 
 	return (
 		<ErrorBoundary>

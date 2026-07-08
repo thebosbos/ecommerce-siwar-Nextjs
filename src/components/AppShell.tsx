@@ -2,6 +2,7 @@
 
 import Sidebar from "@/components/Sidebar";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { MainLayout } from "@/components/MainLayout";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -21,6 +22,7 @@ export function AppShell({ children }: AppShellProps) {
       <SidebarInset>
         <Navbar />
         <MainLayout>{children}</MainLayout>
+        <Footer />
       </SidebarInset>
     </SidebarProvider>
   );

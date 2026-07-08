@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, PackageCheck } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
-import { useAddresses, useCreateAddress } from "@/hooks/queries/use-addresses";
+import { useCreateAddress } from "@/hooks/queries/use-addresses";
 import { useCreateOrder } from "@/hooks/queries/use-orders";
 import { toast } from "sonner";
 
@@ -37,7 +37,6 @@ export default function CheckoutForm() {
   const { user } = useAuth();
   const { cartItems, subtotal, isLoading: cartLoading, clearCart } = useCart();
 
-  const { data: addresses } = useAddresses(user?.id || "");
   const createAddress = useCreateAddress();
   const createOrder = useCreateOrder();
 
@@ -51,20 +50,6 @@ export default function CheckoutForm() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Prefill from the user's most recent (or default) saved address
-  useEffect(() => {
-    if (!addresses || addresses.length === 0) return;
-    const preferred = addresses.find((a) => a.is_default) || addresses[0];
-    setFormData({
-      street: preferred.street || "",
-      city: preferred.city || "",
-      state: preferred.state || "",
-      zip_code: preferred.zip_code || "",
-      country: preferred.country || "",
-      phone: preferred.phone || "",
-    });
-  }, [addresses]);
 
   useEffect(() => {
     if (!cartLoading && cartItems.length === 0) {

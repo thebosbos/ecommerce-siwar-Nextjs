@@ -131,87 +131,36 @@ export const profileService = {
         return false;
       }
 
-      // Determine which bucket the current avatar is in (if any)
-      let currentBucket = null;
+      // Extract the current avatar's path (everything after /avatars/) so we
+      // don't delete the one we just uploaded.
       let currentPath = null;
-
-      if (currentAvatarUrl) {
-        const bucketNames = [
-          'default',
-          'avatars',
-          'images',
-          'public',
-          'storage',
-        ];
-        for (const bucket of bucketNames) {
-          if (currentAvatarUrl.includes(`/${bucket}/`)) {
-            currentBucket = bucket;
-            // Extract the path from the URL (everything after bucket name)
-            const urlParts = currentAvatarUrl.split(`/${bucket}/`);
-            if (urlParts.length > 1) {
-              currentPath = urlParts[1];
-            }
-            break;
-          }
-        }
+      if (currentAvatarUrl?.includes('/avatars/')) {
+        currentPath = currentAvatarUrl.split('/avatars/')[1];
       }
 
-      // List of bucket names to try
-      const bucketNames = ['default', 'avatars', 'images', 'public', 'storage'];
+      const { data: files, error: listError } = await supabase.storage
+        .from('avatars')
+        .list(userId);
+
+      if (listError) {
+        console.error('Error listing avatar files:', listError);
+        return false;
+      }
+
+      const filesToDelete = (files || [])
+        .map((file) => `${userId}/${file.name}`)
+        .filter((path) => !(currentPath && currentPath.includes(path)));
+
       let successCount = 0;
+      if (filesToDelete.length > 0) {
+        const { error: deleteError } = await supabase.storage
+          .from('avatars')
+          .remove(filesToDelete);
 
-      // Try to list and delete files from each bucket
-      for (const bucketName of bucketNames) {
-        try {
-          // List all files in the user's folder
-          const { data: files, error: listError } = await supabase.storage
-            .from(bucketName)
-            .list(userId);
-
-          if (listError) {
-            console.log(
-              `Error listing files in bucket "${bucketName}":`,
-              listError
-            );
-            continue;
-          }
-
-          if (!files || files.length === 0) {
-            continue;
-          }
-
-          // Get file paths to delete (excluding current avatar if it's in this bucket)
-          const filesToDelete = files
-            .map((file) => `${userId}/${file.name}`)
-            .filter((path) => {
-              // Skip the current avatar if it's in this bucket
-              if (
-                bucketName === currentBucket &&
-                currentPath &&
-                currentPath.includes(path)
-              ) {
-                return false;
-              }
-              return true;
-            });
-
-          if (filesToDelete.length > 0) {
-            // Delete the files
-            const { error: deleteError } = await supabase.storage
-              .from(bucketName)
-              .remove(filesToDelete);
-
-            if (deleteError) {
-              console.log(
-                `Error deleting files from bucket "${bucketName}":`,
-                deleteError
-              );
-            } else {
-              successCount += filesToDelete.length;
-            }
-          }
-        } catch (error) {
-          console.log(`Error processing bucket "${bucketName}":`, error);
+        if (deleteError) {
+          console.error('Error deleting avatar files:', deleteError);
+        } else {
+          successCount = filesToDelete.length;
         }
       }
 
@@ -227,14 +176,9 @@ export const profileService = {
    *
    * @param userId User ID to associate with the avatar
    * @param file File to upload
-   * @param currentAvatarUrl Optional current avatar URL to replace
    * @returns Promise resolving to public URL of the uploaded avatar
    */
-  async uploadAvatar(
-    userId: string,
-    file: File,
-    currentAvatarUrl?: string
-  ): Promise<string | null> {
+  async uploadAvatar(userId: string, file: File): Promise<string | null> {
     try {
       if (!userId || !file) {
         console.error('Invalid userId or file for avatar upload');
@@ -251,62 +195,31 @@ export const profileService = {
       // Format: userId/avatar-filename.ext
       const filePath = `${userId}/${fileName}`;
 
-      // List of bucket names to try in order
-      const bucketNames = ['default', 'avatars', 'images', 'public', 'storage'];
-      let uploadError = null;
-      let uploadedPath = null;
-      let bucketUsed = null;
+      const { data, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true,
+        });
 
-      // Try to upload to each bucket until one works
-      for (const bucketName of bucketNames) {
-        try {
-          const { data, error } = await supabase.storage
-            .from(bucketName)
-            .upload(filePath, file, {
-              cacheControl: '3600',
-              upsert: true,
-            });
-
-          if (!error) {
-            // Upload succeeded
-            uploadedPath = data?.path || filePath;
-            bucketUsed = bucketName;
-            break; // Exit the loop if upload is successful
-          } else {
-            uploadError = error;
-            console.log(`Failed to upload to bucket "${bucketName}":`, error);
-          }
-        } catch (error) {
-          console.log(`Error trying bucket "${bucketName}":`, error);
-          // Continue to next bucket
-        }
-      }
-
-      // If no bucket worked
-      if (!bucketUsed) {
-        console.error(
-          'All bucket upload attempts failed. Last error:',
-          uploadError
-        );
-        throw new Error(
-          'Failed to upload image. Storage is not properly configured.'
-        );
+      if (uploadError) {
+        console.error('Failed to upload avatar:', uploadError);
+        throw new Error('Failed to upload image.');
       }
 
       // Get the public URL for the uploaded file
       const { data: publicUrlData } = supabase.storage
-        .from(bucketUsed)
-        .getPublicUrl(uploadedPath || filePath);
+        .from('avatars')
+        .getPublicUrl(data?.path || filePath);
 
       if (!publicUrlData?.publicUrl) {
         throw new Error('Failed to get public URL for uploaded image');
       }
 
-      console.log(`Successfully uploaded to bucket "${bucketUsed}"`);
-
-      // Delete previous avatars after successful upload
+      // Delete previous avatars after successful upload, keeping the one we
+      // just uploaded (pass the NEW url so it's excluded from deletion).
       // We don't need to wait for this to complete or handle errors
-      this.deleteUserAvatars(userId, currentAvatarUrl)
+      this.deleteUserAvatars(userId, publicUrlData.publicUrl)
         .then((success) => {
           if (success) {
             console.log('Previous avatars cleaned up successfully');

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, ChangeEvent } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  adminProductService,
   CreateProductData,
   ProductWithDetails,
 } from "@/services/admin/adminProductService";
@@ -24,6 +26,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Upload } from "lucide-react";
+import { toast } from "sonner";
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -61,6 +65,8 @@ export function ProductFormModal({
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Use the query hook to fetch categories
   const {
@@ -163,6 +169,38 @@ export function ProductFormModal({
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const handleImageFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast.error(
+        `File size exceeds 5MB limit (${(file.size / (1024 * 1024)).toFixed(2)}MB)`,
+      );
+      return;
+    }
+
+    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Please upload a valid image file (JPEG, PNG, GIF, or WEBP)");
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const publicUrl = await adminProductService.uploadProductImage(file);
+      handleInputChange("image", publicUrl);
+      toast.success("Image uploaded successfully");
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Failed to upload image");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
     }
   };
 
@@ -305,12 +343,42 @@ export function ProductFormModal({
           </div>
 
           <div>
-            <Label htmlFor="image">Image URL</Label>
+            <Label htmlFor="image">Product Image</Label>
+            <div className="mt-1 flex items-center gap-3">
+              {formData.image && (
+                <Image
+                  src={formData.image}
+                  alt="Product preview"
+                  width={56}
+                  height={56}
+                  className="h-14 w-14 rounded-md border object-cover"
+                />
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={uploading}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="mr-2 h-3.5 w-3.5" />
+                {uploading ? "Uploading..." : "Upload from computer"}
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageFileSelect}
+                disabled={uploading}
+                className="hidden"
+              />
+            </div>
             <Input
               id="image"
               value={formData.image}
               onChange={(e) => handleInputChange("image", e.target.value)}
-              placeholder="https://example.com/image.jpg"
+              placeholder="Or paste an image URL"
+              className="mt-2"
             />
           </div>
 

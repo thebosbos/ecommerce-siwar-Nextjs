@@ -12,6 +12,7 @@ export interface UserFilters {
 export interface SanitizedUserWithStats {
   profile_id: string;
   username: string;
+  avatar_url: string | null;
   email: string; // Sanitized email (masked)
   role: string;
   created_at: string;
@@ -97,6 +98,7 @@ export const adminUserServerService = {
           return {
             profile_id: user.profile_id,
             username: user.username,
+            avatar_url: user.avatar_url || null,
             // Mask email for privacy
             email: maskEmail(user.email),
             role: user.role,

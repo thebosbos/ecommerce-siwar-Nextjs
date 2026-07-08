@@ -24,6 +24,7 @@ interface ProfileCardProps {
   createdAt: string | null;
   isSaving: boolean;
   onSaveProfile: (username: string, email: string, avatarUrl: string) => void;
+  onAvatarUploaded: (avatarUrl: string) => Promise<void>;
   onSignOut: () => void;
   onUpdateEmail?: (newEmail: string) => Promise<void>;
 }
@@ -39,6 +40,7 @@ export function ProfileCard({
   createdAt,
   isSaving,
   onSaveProfile,
+  onAvatarUploaded,
   onSignOut,
   onUpdateEmail,
 }: ProfileCardProps) {
@@ -110,17 +112,12 @@ export function ProfileCard({
     try {
       setUploading(true);
 
-      // Use profile service to upload avatar and pass current avatar URL to delete previous avatars
-      const publicUrl = await profileService.uploadAvatar(
-        user.id,
-        file,
-        avatarUrl,
-      );
+      const publicUrl = await profileService.uploadAvatar(user.id, file);
 
       if (publicUrl) {
-        // Update both local state and parent component state
+        // Update local state and persist to the database immediately
         setAvatarUrlInput(publicUrl);
-        setAvatarUrl(publicUrl); // Update parent component state immediately
+        await onAvatarUploaded(publicUrl);
         // Clear preview since we now have the uploaded URL
         if (previewUrl) {
           URL.revokeObjectURL(previewUrl);

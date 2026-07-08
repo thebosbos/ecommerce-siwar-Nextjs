@@ -1,5 +1,14 @@
 "use client";
-import { ShoppingCart, Moon, Sun, User, LogIn, ChevronDown, LogOut } from "lucide-react";
+import {
+  ShoppingCart,
+  Moon,
+  Sun,
+  User,
+  LogIn,
+  ChevronDown,
+  LogOut,
+  LayoutDashboard,
+} from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -121,6 +130,10 @@ export function Navbar() {
                 }
               />
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => router.push("/dashboard")}>
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/profile")}>
                   <User className="h-4 w-4" />
                   Profile

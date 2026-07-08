@@ -27,6 +27,7 @@ export const addressService = {
       .single();
 
     if (error) {
+      console.error('Error saving address:', error);
       toast.error('Failed to save address');
       throw error;
     }
@@ -41,6 +42,7 @@ export const addressService = {
       .order('created_at', { ascending: false });
 
     if (error) {
+      console.error('Error fetching addresses:', error);
       toast.error('Failed to fetch addresses');
       throw error;
     }
@@ -64,6 +66,7 @@ export const addressService = {
       .single();
 
     if (error) {
+      console.error('Error updating address:', error);
       toast.error('Failed to update address');
       throw error;
     }
@@ -77,6 +80,7 @@ export const addressService = {
       .eq('id', addressId);
 
     if (error) {
+      console.error('Error deleting address:', error);
       toast.error('Failed to delete address');
       throw error;
     }

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Calendar,
   DollarSign,
@@ -104,9 +105,16 @@ export default async function AdminUsersPage({
               <CardContent className="pt-6">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-                      <User className="h-6 w-6 text-gray-600" />
-                    </div>
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage
+                        src={user.avatar_url || undefined}
+                        alt={user.username}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="bg-gray-100 text-gray-600">
+                        <User className="h-6 w-6" />
+                      </AvatarFallback>
+                    </Avatar>
                     <div className="min-w-0 flex-1">
                       <h3 className="truncate font-semibold">
                         {user.username}

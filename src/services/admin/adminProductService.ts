@@ -30,6 +30,32 @@ export interface ProductWithDetails extends Omit<ProductType, "category"> {
  */
 export const adminProductService = {
   /**
+   * Upload a product image to Supabase Storage and return its public URL
+   */
+  async uploadProductImage(file: File): Promise<string> {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${crypto.randomUUID()}.${fileExt}`;
+
+    const { error } = await supabase.storage
+      .from("products")
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (error) {
+      console.error("Error uploading product image:", error);
+      throw error;
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("products").getPublicUrl(fileName);
+
+    return publicUrl;
+  },
+
+  /**
    * Get all products with additional details for admin view
    */
   async getAllProducts(): Promise<ProductWithDetails[]> {
