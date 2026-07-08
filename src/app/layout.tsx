@@ -37,8 +37,7 @@ export default function RootLayout({
               <CartProvider>
                 <ThemeProvider
                   attribute="class"
-                  defaultTheme="system"
-                  enableSystem
+                  defaultTheme="light"
                   disableTransitionOnChange
                 >
                   <AppShell>{children}</AppShell>
