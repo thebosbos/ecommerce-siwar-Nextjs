@@ -102,7 +102,7 @@ export function Footer() {
 
       <div className="border-border border-t">
         <div className="text-muted-foreground container mx-auto px-4 py-4 text-center text-xs">
-          &copy; {year} Glow&Home. All rights reserved.
+          &copy; {year}  boussaadaservices. All rights reserved.
         </div>
       </div>
     </footer>
